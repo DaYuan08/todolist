@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>todomvc-vue</title>
+    <link href="css/normalize.8.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
+    <script src="js/vue.min.js"></script>
+</head>
+
+<body>
+<div id="todos">
+    <h1>todos</h1>
+    <div id="app">
+        <div class="title">
+            <div class="checkbox" :class="tasks.length == 0 ?'hide':undone == 0 ?'checked':''" @click="updateAchieve()"></div>
+            <input class="add" autofocus="autofocus" autocomplete="off" placeholder="What needs to be done?" v-model="newTask" @keyup.enter="addTask">
+        </div>
+        <div class="items">
+            <div class="item" :class="id == task.id ?'editing' :''" v-for="task in filterTasks">
+                <div class="content">
+                    <div class="checkbox" :class="task.achieve == true ? 'checked' : ''" @click="updateAchieve(task.id)">
+                        <svg viewBox="12 13 29 22" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="13.2427972 23.7361617 21.8111153 32.3044798 38 16.1155951"></polyline>
+                        </svg>
+                    </div>
+                    <div class="text" @dblclick="id = task.id">{{task.content}}</div>
+                    <div class="remove" @click="deleteTask(task.id)">
+                        <svg viewBox="19 19 22 22" stroke-linecap="round" width="18" height="18" stroke="currentColor" stroke-width="2">
+                            <g transform="translate(21.000000, 21.000000)">
+                                <path d="M0.333333333,0.333333333 L17.4148373,17.4148373"></path>
+                                <path d="M0.333333333,0.333333333 L17.4148373,17.4148373" transform="translate(9.000000, 9.000000) scale(-1, 1) translate(-9.000000, -9.000000)"></path>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+                <input class="edit" type="text" :value="task.content" @keyup.enter="updateContent" @blur="id = ''" v-focus>
+            </div>
+        </div>
+        <div class="footer" v-show="tasks.length > 0">
+            <span class="state">
+                {{undone}} {{undone == 1 ? 'item ' : 'items '}} left
+            </span>
+            <ul class="filters">
+                <li><a href="#/all" :class="state == 0?'selected':''" @click="state = 0">All</a></li>
+                <li><a href="#/active" :class="state == 1?'selected':''" @click="state = 1">Active</a></li>
+                <li><a href="#/completed" :class="state == 2?'selected':''" @click="state = 2">Completed</a></li>
+            </ul>
+            <a class="clear-completed" :class="undone < tasks.length ?'' :'hide'" @click="deleteTask()">
+                Clear completed
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el: "#todos",
+        data: {
+            id: "",
+            tasks: [],
+            state: 0,
+            undone: 0,
+            newTask: ""
+        },
+        created() {
+            this.tasks = JSON.parse(localStorage.getItem("vueTasks")) || [];
+            this.state = localStorage.getItem("vueState") || 0;
+            this.undone = this.$data.tasks.filter(task => task.achieve == false).length;
+        },
+        updated() {
+            this.$data.undone = this.$data.tasks.filter(task => task.achieve == false).length;
+            localStorage.setItem("vueTasks", JSON.stringify(this.$data.tasks));
+            localStorage.setItem("vueState", this.$data.state);
+        },
+        computed: {
+            filterTasks() {
+                if(this.state == 1) return this.tasks.filter(task => task.achieve == false);
+                else if(this.state == 2) return this.tasks.filter(task => task.achieve == true);
+                else return this.tasks;
+            }
+        },
+        methods: {
+            addTask() {
+                if(!this.newTask.trim()) return;
+                this.tasks.unshift({"id":Math.trunc(Math.random() * 1000000), "content": this.newTask, "achieve": false});
+                this.newTask = "";
+            },
+            deleteTask(id) {
+                if(id) this.tasks.splice(this.tasks.findIndex(task => task.id == id), 1);
+                else this.tasks = this.tasks.filter(task => task.achieve == false);
+            },
+            updateAchieve(id) {
+                if(id) {
+                    let index = this.tasks.findIndex(task => task.id == id);
+                    let task = this.tasks[index];
+                    task.achieve = !task.achieve;
+                    this.tasks.splice(index, 1);
+                    this.tasks.unshift(task);
+                }else {
+                    if (this.tasks.filter(task => task.achieve == true).length == this.tasks.length) this.tasks.forEach(task => task.achieve = !task.achieve);
+                    else this.tasks.forEach(task => task.achieve = true);
+                }
+            },
+            updateContent() {
+                let index = this.tasks.findIndex(task => task.id == this.id);
+                let task = this.tasks[index];
+                task.content = event.target.value;
+                this.tasks.splice(index, 1);
+                this.tasks.unshift(task);
+                this.id = "";
+            }
+        },
+    })
+    Vue.directive("focus", {
+        update: function(e){
+            e.focus();
+        }
+    })
+</script>
+</html>

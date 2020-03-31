@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>todomvc-jquery</title>
+    <link href="css/normalize.8.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/jquery.js"></script>
+</head>
+
+<body>
+<div id="todos">
+    <h1>todos</h1>
+    <div id="app">
+        <div class="title">
+            <div class="checkbox hide"></div>
+            <input class="add" autofocus="autofocus" autocomplete="off" placeholder="What needs to be done?">
+        </div>
+        <div class="items"></div>
+        <div class="footer">
+            <span class="state"></span>
+            <ul class="filters">
+                <li><a id="all" href="#/all">All</a></li>
+                <li><a id="active" href="#/active">Active</a></li>
+                <li><a id="completed" href="#/completed">Completed</a></li>
+            </ul>
+            <a class="clear-completed">
+                Clear completed
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    monitor();
+</script>
+</html>
